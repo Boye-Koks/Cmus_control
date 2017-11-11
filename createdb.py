@@ -1,31 +1,48 @@
 #! /usr/bin/python3
 
-import parsedata as pd
 import os, sys
 import subprocess, shlex
+from mutagen.mp3 import EasyMP3 as mp3
 
 class InitDB(object):
 
-    def __init__(self, database):
-        self.db = database
-        self.path = None
-
-    def create(self, path):
-        self.path = path
-        self.createDB()
+    def __init__(self
+        self.database = dict()
+        self.locations = list()
 
     def createDB(self):
-        # Check whether we have locations, create if not
-        string = 'find {0} -name *.mp3'.format(self.path)
+        string = 'find -name *.mp3'
         a = subprocess.Popen(shlex.split(string), stdout=subprocess.PIPE)
         res, err = a.communicate()
-        res = res.decode('utf-8')
-        f = open('locations', 'w')
-        f.write(res)
+        self.locations = res.decode('utf-8').splitlines()
+        self.writeData()
+
+    def writeData(self):
+        mp3s = [mp3(l) for l in self.locations]
+        data = [(d['artist'][0], d['title'][0]) for d in mp3s]
+        self.database = [self.toDict([data[i][0], data[i][1], self.locations[i]]) for i in range(0,len(self.locations))]
+        self.toFile()
+
+    def toDict(self, songdata):
+        result = dict()
+        for val in songdata:
+            result['artist'] = songdata[0]
+            result['song'] = songdata[1]
+            result['location'] = songdata[2]
+        return result
+
+    def toFile(self):
+        filename = 'data'
+        result = ""
+        for val in self.database:
+            artist = val['artist']
+            song = val['song']
+            location = val['location']
+            result += artist + " | " + song + " | " + location + "\n"
+        f = open(filename, "w")
+        f.write(result)
         f.close()
-        # Create database
-        self.db.writeData('locations', 'data')
-        os.remove('locations')
 
 if __name__ == '__main__':
-    InitDB()
+    i = InitDB()
+    i.createDB()

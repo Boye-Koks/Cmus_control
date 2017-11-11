@@ -6,17 +6,9 @@ import subprocess, shlex
 
 class Main(object):
 
-    def __init__(self, argv, database):
+    def __init__(self, config, database):
         self.database = database
-        socket = None
-        passwd = None
-        if len(argv) == 2:
-            socket = argv[0]
-            passwd = argv[1]
-        else:
-            print("No arguments parsed")
-        self.socket = socket
-        self.passwd = passwd
+        self.config = config
 
     def main(self):
         finished = False
@@ -72,9 +64,7 @@ class Main(object):
         return selected_song
 
     def queueSong(self, song):
-        command = ['cmus-remote', '-q', song['location']]
-        if self.socket:
-            command = ['cmus-remote', '--server', self.socket, '--passwd', self.passwd, '-q', song['location']]
+        command = shlex.split("ssh {0} 'cmus-remote -q {1}'".format(self.config['ssh_hostname'], song['location']))
         a = subprocess.Popen(command)
 
     def askFinished(self):
