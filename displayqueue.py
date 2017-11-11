@@ -9,7 +9,10 @@ class Queue(object):
         self.config = config
 
     def show(self):
-        command = shlex.split("ssh {0} 'cmus-remote -C \"save -q -\"'".format(self.config['ssh_hostname']))
+        if self.config['local'].lower() == 'true':
+            command = shlex.split('cmus-remote -C "save -q -"')
+        else:
+            command = shlex.split("ssh {0} 'cmus-remote -C \"save -q -\"'".format(self.config['ssh_hostname']))
         p = subprocess.Popen(command, stdout=subprocess.PIPE)
         res, err = p.communicate()
         songs = res.decode('utf-8').splitlines()

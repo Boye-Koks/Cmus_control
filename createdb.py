@@ -6,7 +6,7 @@ from mutagen.mp3 import EasyMP3 as mp3
 
 class InitDB(object):
 
-    def __init__(self
+    def __init__(self):
         self.database = dict()
         self.locations = list()
 
@@ -14,7 +14,7 @@ class InitDB(object):
         string = 'find -name *.mp3'
         a = subprocess.Popen(shlex.split(string), stdout=subprocess.PIPE)
         res, err = a.communicate()
-        self.locations = res.decode('utf-8').splitlines()
+        self.locations = [os.path.abspath(line) for line in res.decode('utf-8').splitlines()]
         self.writeData()
 
     def writeData(self):

@@ -5,9 +5,8 @@ from mutagen.mp3 import EasyMP3 as mp3
 
 class Database(object):
 
-    def __init__(self, config):
+    def __init__(self):
         self.database = list()
-        self.config = config
 
     def readDatabase(self, fromfile):
         f = open(fromfile)
