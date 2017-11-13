@@ -65,9 +65,11 @@ class Main(object):
 
     def queueSong(self, song):
         if self.config['local'].lower() == 'true':
-            command = shlex.split('cmus-remote -q "{0}"'.format(song['location']))
+            command = ['cmus-remote', '-q', song['location']]
+            # command = shlex.split('cmus-remote -q "{0}"'.format(song['location']))
         else:
-            command = shlex.split("ssh {0} 'cmus-remote -q {1}'".format(self.config['ssh_hostname'], song['location']))
+            command = ['ssh', self.config['ssh_hostname'], 'cmus-remote -q "{0}"'.format(song['location'])]
+            # command = shlex.split("ssh {0} 'cmus-remote -q \"{1}\"'".format(self.config['ssh_hostname'], song['location']))
         a = subprocess.Popen(command)
 
     def askFinished(self):

@@ -4,6 +4,7 @@ import sys, os, subprocess, shlex
 import displayqueue as dq
 import queuesongs as qs
 import parsedata as pd
+import cmuscontrol as cc
 
 def main():
 
@@ -12,7 +13,8 @@ def main():
     config = initConfig()
     database = pd.Database()
     queue_song = qs.Main(config, database)
-    show_queue = dq.Queue(config)
+    show_queue = dq.Queue(config, database)
+    control = cc.Controller(config)
 
     datafile = initData(config)
     database.readDatabase(datafile)
@@ -27,6 +29,8 @@ def main():
         elif result == 2:
             msg = show_queue.show()
         elif result == 3:
+            control.show()
+        elif result == 4:
             print("Exiting!")
             quit()
         clearScreen()
@@ -34,14 +38,14 @@ def main():
             print(msg)
 
 def showMenu():
-    menu = "Select an option:\n1. Queue songs\n2. Show Queue\n3. Quit\nSelection: "
+    menu = "Select an option:\n1. Queue songs\n2. Show Queue\n3. Control\n4. Quit\nSelection: "
     result = -1
     while not result > 0:
         try:
             result = int(input(menu))
         except ValueError:
             print("Invalid input, try again!")
-        if result > 3:
+        if result > 4:
             clearScreen()
             print("Invalid input, try again!")
             result = -1
@@ -82,13 +86,13 @@ def initData(config):
     datafile = config['datafile'] if 'datafile' in config else 'data'
     if os.path.isfile(datafile):
         return datafile
-    elif 'local' in config and config['local'].lower() == 'true':
+    elif 'local' in config and config['local'].lower() == 'false':
         print("No local data file found! Trying to load remote file at '{0}'".format(config['ssh_hostname']))
         try:
             getData(config)
             clearScreen()
-            return datafile
             print("Remote data file loaded!")
+            return datafile
         except:
             print("No remote data file found!\nExiting!")
             quit()
