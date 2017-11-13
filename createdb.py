@@ -2,47 +2,44 @@
 
 import os, sys
 import subprocess, shlex
+from mutagen.mp3 import HeaderNotFoundError
 from mutagen.mp3 import EasyMP3 as mp3
+from progress.bar import Bar
 
 class InitDB(object):
 
     def __init__(self):
-        self.database = dict()
-        self.locations = list()
+        locations = self.getLocations()
+        datafile = self.initFile()
+        bar = Bar('Processing', max=(len(locations)))
+        errorfile = open('errors', 'w')
+        for location in locations:
+            try:
+                artist, song = self.toDict(location)
+                line = "{0} | {1} | {2}\n".format(artist, song, location)
+                datafile.write(line)
+            except (KeyError, HeaderNotFoundError):
+                errorfile.write(location)
+            bar.next()
+        datafile.close()
+        errorfile.close()
+        bar.finish()
 
-    def createDB(self):
+    def initFile(self):
+        datafile = open('data', 'w')
+        datafile.write('')
+        datafile.close()
+        return open('data', 'a')
+
+    def getLocations(self):
         string = 'find -name *.mp3'
         a = subprocess.Popen(shlex.split(string), stdout=subprocess.PIPE)
         res, err = a.communicate()
-        self.locations = [os.path.abspath(line) for line in res.decode('utf-8').splitlines()]
-        self.writeData()
+        return [os.path.abspath(line) for line in res.decode('utf-8').splitlines()]
 
-    def writeData(self):
-        mp3s = [mp3(l) for l in self.locations]
-        data = [(d['artist'][0], d['title'][0]) for d in mp3s]
-        self.database = [self.toDict([data[i][0], data[i][1], self.locations[i]]) for i in range(0,len(self.locations))]
-        self.toFile()
-
-    def toDict(self, songdata):
-        result = dict()
-        for val in songdata:
-            result['artist'] = songdata[0]
-            result['song'] = songdata[1]
-            result['location'] = songdata[2]
-        return result
-
-    def toFile(self):
-        filename = 'data'
-        result = ""
-        for val in self.database:
-            artist = val['artist']
-            song = val['song']
-            location = val['location']
-            result += artist + " | " + song + " | " + location + "\n"
-        f = open(filename, "w")
-        f.write(result)
-        f.close()
+    def toDict(self, location):
+        mp3tags = mp3(location)
+        return (mp3tags['artist'][0], mp3tags['title'][0])
 
 if __name__ == '__main__':
-    i = InitDB()
-    i.createDB()
+    InitDB()
