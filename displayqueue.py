@@ -18,7 +18,10 @@ class Queue(object):
         p = subprocess.Popen(command, stdout=subprocess.PIPE)
         res, err = p.communicate()
         songhash = hash(res.decode('utf-8').splitlines()[1].strip('file '))
-        songdata = [self.database.database[songhash]]
+        try:
+            songdata = [self.database.database[songhash]]
+        except KeyError:
+            songdata = []
 
         # Get queued songs
         if self.config['local'].lower() == 'true':
@@ -29,7 +32,10 @@ class Queue(object):
         res, err = p.communicate()
         songs = res.decode('utf-8').splitlines()
         hashes = map(hash, songs)
-        songdata += [self.database.database[x] for x in hashes]
+        try:
+            songdata += [self.database.database[x] for x in hashes]
+        except KeyError:
+            songdata += []
         # songstring = self.listToString(songdata)
         if not songdata:
             return [-1]

@@ -15,7 +15,6 @@ class Runnable(QRunnable):
         app = QCoreApplication.instance()
         while True:
             self.result = self.dq.show()
-            print("Running!")
             time.sleep(1)
         app.quit()
 

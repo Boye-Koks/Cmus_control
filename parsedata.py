@@ -30,6 +30,5 @@ class Database(object):
         if not matchstring:
             return sorted([self.database[k] for k in self.database], key=lambda x: x['artist'])
         matchstring = matchstring.lower()
-        # return [val for k,v in list(self.database) if matchstring in val['artist'].lower() or matchstring in val['song'].lower()]
         result = [self.database[k] for k in self.database if matchstring in self.database[k]['artist'].lower() or matchstring in self.database[k]['song'].lower()]
         return sorted(result, key=lambda x: x['artist'])
