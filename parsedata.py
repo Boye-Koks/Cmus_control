@@ -12,8 +12,11 @@ class Database(object):
         f = open(fromfile)
         data = f.read().splitlines()
         f.close()
-        self.database = [self.toDict(d.split(" | ")) for d in data]
-        # self.toFile(fromfile)
+        self.database = dict()
+        for d in data:
+            value = self.toDict(d.split(" | "))
+            key = hash(value['location'])
+            self.database[key] = value
 
     def toDict(self, songdata):
         result = dict()
@@ -23,6 +26,10 @@ class Database(object):
             result['location'] = songdata[2]
         return result
 
-    def findMatches(self, matchstring):
+    def findMatches(self, matchstring=None):
+        if not matchstring:
+            return sorted([self.database[k] for k in self.database], key=lambda x: x['artist'])
         matchstring = matchstring.lower()
-        return [val for val in self.database if matchstring in val['artist'].lower() or matchstring in val['song'].lower()]
+        # return [val for k,v in list(self.database) if matchstring in val['artist'].lower() or matchstring in val['song'].lower()]
+        result = [self.database[k] for k in self.database if matchstring in self.database[k]['artist'].lower() or matchstring in self.database[k]['song'].lower()]
+        return sorted(result, key=lambda x: x['artist'])

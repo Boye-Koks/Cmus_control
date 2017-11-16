@@ -26,21 +26,30 @@ class Controller(object):
             if result == 1:
                 #play/pause
                 msg = "Toggled play/pause!"
-                self.simplecommand('-u')
+                self.playpause()
             elif result == 2:
                 #skip
                 msg = "Skipped!"
-                self.simplecommand('-q -n')
+                self.skip()
             elif result == 3:
                 #restart
                 msg = "Restarted!"
-                self.simplecommand('-q -r')
+                self.restart()
             elif result == 4:
                 msg = self.changevolume()
             else:
                 return True
             self.clearScreen()
             print(msg)
+
+    def playpause(self):
+        self.simplecommand('-u')
+
+    def skip(self):
+        self.simplecommand('-q -n')
+
+    def restart(self):
+        self.simplecommand('-q -r')
 
     def simplecommand(self, args):
         if self.config['local'].lower() == 'true':
